@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import {
+import client, {
   databases,
   DATABASE_ID,
   COLLECTION_ID_MESSAGES,
@@ -13,6 +13,13 @@ export const Room = () => {
 
   useEffect(() => {
     getMessages()
+
+    client.subscribe(
+      `databases.${DATABASE_ID}.collections.${COLLECTION_ID_MESSAGES}.documents`,
+      (response) => {
+        console.log('REAL TIME:', response)
+      }
+    )
   }, [])
 
   const handleSubmit = async (e) => {
