@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import client, {
   databases,
   DATABASE_ID,
@@ -14,12 +14,34 @@ export const Room = () => {
   useEffect(() => {
     getMessages()
 
-    client.subscribe(
+    const unsubscribe = client.subscribe(
       `databases.${DATABASE_ID}.collections.${COLLECTION_ID_MESSAGES}.documents`,
       (response) => {
-        console.log('REAL TIME:', response)
+        if (
+          response.events.includes(
+            'databases.*.collections.*.documents.*.create'
+          )
+        ) {
+          console.log('A MESSAGE WAS CREATED')
+          setMessages((prevState) => [response.payload, ...prevState])
+        }
+
+        if (
+          response.events.includes(
+            'databases.*.collections.*.documents.*.delete'
+          )
+        ) {
+          console.log('A MESSAGE WAS DELETED!!!')
+          setMessages((prevState) =>
+            prevState.filter((message) => message.$id !== response.payload.$id)
+          )
+        }
       }
     )
+
+    return () => {
+      unsubscribe()
+    }
   }, [])
 
   const handleSubmit = async (e) => {
@@ -38,7 +60,7 @@ export const Room = () => {
 
     console.log('Created:', response)
 
-    setMessages((prevState) => [response, ...messages])
+    setMessages((prevState) => [response, ...prevState])
 
     setMessageBody('')
   }
@@ -55,9 +77,9 @@ export const Room = () => {
 
   const deleteMessage = async (message_id) => {
     databases.deleteDocument(DATABASE_ID, COLLECTION_ID_MESSAGES, message_id)
-    setMessages((prevState) =>
-      prevState.filter((message) => message.$id !== message_id)
-    )
+    // setMessages((prevState) =>
+    //   prevState.filter((message) => message.$id !== message_id)
+    // )
   }
 
   return (
@@ -72,8 +94,7 @@ export const Room = () => {
               onChange={(e) => {
                 setMessageBody(e.target.value)
               }}
-              value={messageBody}
-            ></textarea>
+              value={messageBody}></textarea>
           </div>
 
           <div className='send-btn--wrapper'>
@@ -82,7 +103,7 @@ export const Room = () => {
         </form>
 
         <div>
-          {messages.map((message) => (
+          {messages.map((message, i) => (
             <div key={message.$id} className='message--wrapper'>
               <div className='message--header'>
                 <small className='message-timestamp'>
