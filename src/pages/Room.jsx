@@ -5,6 +5,7 @@ import {
   COLLECTION_ID_MESSAGES,
 } from '../appwriteConfig'
 import { ID, Query } from 'appwrite'
+import { Trash2 } from 'react-feather'
 
 export const Room = () => {
   const [messages, setMessages] = useState([])
@@ -39,10 +40,17 @@ export const Room = () => {
     const response = await databases.listDocuments(
       DATABASE_ID,
       COLLECTION_ID_MESSAGES,
-      [Query.orderDesc('$createdAt')]
+      [Query.orderDesc('$createdAt'), Query.limit(20)]
     )
     console.log(response)
     setMessages(response.documents)
+  }
+
+  const deleteMessage = async (message_id) => {
+    databases.deleteDocument(DATABASE_ID, COLLECTION_ID_MESSAGES, message_id)
+    setMessages((prevState) =>
+      prevState.filter((message) => message.$id !== message_id)
+    )
   }
 
   return (
@@ -67,15 +75,22 @@ export const Room = () => {
         </form>
 
         <div>
-          {messages.map((messages) => (
-            <div key={messages.$id} className='message--wrapper'>
+          {messages.map((message) => (
+            <div key={message.$id} className='message--wrapper'>
               <div className='message--header'>
                 <small className='message-timestamp'>
-                  {messages.$createdAt}
+                  {new Date(message.$createdAt).toLocaleString()}
                 </small>
+
+                <Trash2
+                  className='delete--btn'
+                  onClick={() => {
+                    deleteMessage(message.$id)
+                  }}
+                />
               </div>
               <div className='message--body'>
-                <span>{messages.body}</span>
+                <span>{message.body}</span>
               </div>
             </div>
           ))}
