@@ -27,6 +27,12 @@ export const Room = () => {
       ID.unique(),
       payload
     )
+
+    console.log('Created:', response)
+
+    setMessages((prevState) => [response, ...messages])
+
+    setMessageBody('')
   }
 
   const getMessages = async () => {
@@ -41,7 +47,7 @@ export const Room = () => {
   return (
     <main className='container'>
       <div className='room--container'>
-        <form id='message--form'>
+        <form onSubmit={handleSubmit} id='message--form'>
           <div>
             <textarea
               required
@@ -52,6 +58,10 @@ export const Room = () => {
               }}
               value={messageBody}
             ></textarea>
+          </div>
+
+          <div className='send-btn--wrapper'>
+            <input className='btn btn--secondary' type='submit' value='Send' />
           </div>
         </form>
 
