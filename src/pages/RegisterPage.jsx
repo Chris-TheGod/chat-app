@@ -1,21 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../utils/AuthContext'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
-export const LoginPage = () => {
-  const { user, handleUserLogin } = useAuth()
-  const navigate = useNavigate()
+export const RegisterPage = () => {
+  const { handleUserRegister } = useAuth()
 
   const [credentials, setCredentials] = useState({
     email: '',
-    password: '',
+    password1: '',
+    password2: '',
   })
-
-  useEffect(() => {
-    if (user) {
-      navigate('/')
-    }
-  }, [])
 
   const handleInputChange = (e) => {
     let name = e.target.name
@@ -29,7 +23,7 @@ export const LoginPage = () => {
       <div className='form-wrapper'>
         <form
           onSubmit={(e) => {
-            handleUserLogin(e, credentials)
+            handleUserRegister(e, credentials)
           }}>
           <div className='field-wrapper'>
             <label>Email:</label>
@@ -48,9 +42,20 @@ export const LoginPage = () => {
             <input
               type='password'
               required
-              name='password'
+              name='password1'
               placeholder='Enter your password...'
-              value={credentials.password}
+              value={credentials.password1}
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className='field-wrapper'>
+            <label>Confirm Password:</label>
+            <input
+              type='password'
+              required
+              name='password2'
+              placeholder='Enter your password...'
+              value={credentials.password2}
               onChange={handleInputChange}
             />
           </div>
@@ -63,9 +68,10 @@ export const LoginPage = () => {
           </div>
         </form>
         <p>
-          Dont have an account? Register <Link to='/register'>here</Link>
+          Already have an account? <Link to='/login'>here</Link>
         </p>
       </div>
     </div>
   )
 }
+Link
